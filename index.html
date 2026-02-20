@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Classroom Energy Monitor | SmartEdge Solutions</title>
-    
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -29,17 +30,19 @@
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body class="bg-brand-light text-brand-dark font-sans antialiased min-h-screen flex flex-col">
 
     <!-- Header -->
-    <header class="bg-white border-b border-slate-200 py-4 px-6 md:px-12 flex flex-col md:flex-row justify-between items-center sticky top-0 z-50">
+    <header
+        class="bg-white border-b border-slate-200 py-4 px-6 md:px-12 flex flex-col md:flex-row justify-between items-center sticky top-0 z-50">
         <div class="flex items-center gap-3 mb-2 md:mb-0">
             <div class="w-10 h-10 rounded-lg bg-brand-blue flex items-center justify-center shadow-lg shadow-blue-200">
                 <i class="fa-solid fa-bolt-lightning text-white text-lg"></i>
@@ -63,14 +66,17 @@
 
         <!-- Dashboard Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            
+
             <!-- Temperature Card -->
-            <div class="bg-white rounded-2xl p-8 border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-300 group">
+            <div
+                class="bg-white rounded-2xl p-8 border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-300 group">
                 <div class="flex justify-between items-start mb-6">
-                    <div class="p-4 rounded-xl bg-orange-50 text-orange-500 group-hover:bg-orange-100 transition-colors">
+                    <div
+                        class="p-4 rounded-xl bg-orange-50 text-orange-500 group-hover:bg-orange-100 transition-colors">
                         <i class="fa-solid fa-temperature-three-quarters text-3xl"></i>
                     </div>
-                    <span class="px-3 py-1 bg-green-50 text-green-600 text-xs font-bold rounded-full border border-green-100 uppercase tracking-wider">Live</span>
+                    <span
+                        class="px-3 py-1 bg-green-50 text-green-600 text-xs font-bold rounded-full border border-green-100 uppercase tracking-wider">Live</span>
                 </div>
                 <div>
                     <h3 class="text-slate-500 font-medium mb-1">Classroom Temperature</h3>
@@ -86,13 +92,15 @@
             </div>
 
             <!-- Occupancy Card -->
-            <div class="bg-white rounded-2xl p-8 border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-300 group">
+            <div
+                class="bg-white rounded-2xl p-8 border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-300 group">
                 <div class="flex justify-between items-start mb-6">
                     <div class="p-4 rounded-xl bg-blue-50 text-brand-blue group-hover:bg-blue-100 transition-colors">
                         <i class="fa-solid fa-users text-3xl"></i>
                     </div>
                     <span id="status-indicator" class="relative flex h-3 w-3">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                        <span
+                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-3 w-3 bg-brand-blue"></span>
                     </span>
                 </div>
@@ -111,7 +119,8 @@
         </div>
 
         <!-- System Status Footer -->
-        <div class="mt-12 p-6 bg-brand-accent rounded-xl border border-blue-50 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div
+            class="mt-12 p-6 bg-brand-accent rounded-xl border border-blue-50 flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
                     <span class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
@@ -134,7 +143,12 @@
         <p>© 2026 SmartEdge Solutions. All rights reserved.</p>
     </footer>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
     <!-- App Scripts -->
     <script src="js/app.js"></script>
 </body>
+
 </html>

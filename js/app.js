@@ -1,5 +1,5 @@
 /**
- * Smart Classroom Energy Monitor - Application Logic
+ * Smart Classroom Energy Monitor - IoT Integration Logic
  * Developed by SmartEdge Solutions
  */
 
@@ -11,73 +11,103 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentTimeEl = document.getElementById('current-time');
     const statusIndicator = document.getElementById('status-indicator');
 
-    // Initial state
-    let currentTemp = 24.5;
-    let isOccupied = true;
+    // === FIREBASE CONFIGURATION ===
+    // Replace the placeholders below with your actual project config from Firebase Console
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+        databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT_ID.appspot.com",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "YOUR_APP_ID"
+    };
 
-    /**
-     * Updates the digital clock in the footer
-     */
-    function updateClock() {
-        const now = new Date();
-        currentTimeEl.textContent = now.toLocaleTimeString([], { 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit' 
-        });
-    }
+    // Check if config is still placeholders
+    const isConfigPlaceholder = firebaseConfig.apiKey === "YOUR_API_KEY";
 
-    /**
-     * Simulates temperature fluctuations
-     */
-    function updateTemperature() {
-        // Random fluctuation between -0.2 and +0.2
-        const fluctuation = (Math.random() * 0.4) - 0.2;
-        currentTemp = Math.max(18, Math.min(32, currentTemp + fluctuation));
-        
-        // Update UI with animation if significant change
-        tempValueEl.textContent = currentTemp.toFixed(1);
-        
-        // Update "last updated" timestamp
-        const now = new Date();
-        tempUpdateTimeEl.textContent = now.toLocaleTimeString([], { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-        });
-    }
+    if (isConfigPlaceholder) {
+        console.warn("Firebase config is not set. Dashboard is in DEMO mode.");
+        startSimulation(); // Fallback to simulation if not configured
+    } else {
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-    /**
-     * Simulates occupancy changes
-     */
-    function updateOccupancy() {
-        // 20% chance to toggle status
-        if (Math.random() > 0.8) {
-            isOccupied = !isOccupied;
-            
-            if (isOccupied) {
-                occupancyStatusEl.innerHTML = '<span class="text-brand-blue animate-pulse">Occupied</span>';
-                statusIndicator.innerHTML = `
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-3 w-3 bg-brand-blue"></span>
-                `;
-            } else {
-                occupancyStatusEl.innerHTML = '<span class="text-slate-400">Not Occupied</span>';
-                statusIndicator.innerHTML = `
-                    <span class="relative inline-flex rounded-full h-3 w-3 bg-slate-300"></span>
-                `;
+        // Listen for Temperature updates
+        database.ref('classroom/temperature').on('value', (snapshot) => {
+            const temp = snapshot.val();
+            if (temp !== null) {
+                tempValueEl.textContent = parseFloat(temp).toFixed(1);
+                updateTimestamp(tempUpdateTimeEl);
             }
+        });
+
+        // Listen for Occupancy updates
+        database.ref('classroom/occupied').on('value', (snapshot) => {
+            const isOccupied = snapshot.val();
+            if (isOccupied !== null) {
+                updateOccupancyUI(isOccupied);
+            }
+        });
+    }
+
+    /**
+     * Helper to update UI based on occupancy status
+     */
+    function updateOccupancyUI(isOccupied) {
+        if (isOccupied) {
+            occupancyStatusEl.innerHTML = '<span class="text-brand-blue animate-pulse">Occupied</span>';
+            statusIndicator.innerHTML = `
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-brand-blue"></span>
+            `;
+        } else {
+            occupancyStatusEl.innerHTML = '<span class="text-slate-400">Not Occupied</span>';
+            statusIndicator.innerHTML = `
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-slate-300"></span>
+            `;
         }
     }
 
-    // Initialize UI
-    updateClock();
-    updateTemperature();
-    
-    // Initial occupancy state
-    occupancyStatusEl.innerHTML = '<span class="text-brand-blue animate-pulse">Occupied</span>';
+    /**
+     * Helper to update "Last Updated" timestamp
+     */
+    function updateTimestamp(element) {
+        const now = new Date();
+        element.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
 
-    // Set intervals
+    /**
+     * Clock update loop
+     */
+    function updateClock() {
+        const now = new Date();
+        currentTimeEl.textContent = now.toLocaleTimeString([], {
+            hour: '2-digit', minute: '2-digit', second: '2-digit'
+        });
+    }
     setInterval(updateClock, 1000);
-    setInterval(updateTemperature, 3000); // Update temp every 3 seconds
-    setInterval(updateOccupancy, 10000);  // Check occupancy every 10 seconds
+    updateClock();
+
+    // --- DEMO SIMULATION FALLBACK ---
+    function startSimulation() {
+        let currentTemp = 24.5;
+        let isOccupied = true;
+
+        setInterval(() => {
+            currentTemp += (Math.random() * 0.4) - 0.2;
+            tempValueEl.textContent = currentTemp.toFixed(1);
+            updateTimestamp(tempUpdateTimeEl);
+        }, 3000);
+
+        setInterval(() => {
+            if (Math.random() > 0.8) {
+                isOccupied = !isOccupied;
+                updateOccupancyUI(isOccupied);
+            }
+        }, 10000);
+
+        updateOccupancyUI(isOccupied);
+    }
 });
