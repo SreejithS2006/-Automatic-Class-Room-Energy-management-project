@@ -14,13 +14,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // === FIREBASE CONFIGURATION ===
     // Replace the placeholders below with your actual project config from Firebase Console
     const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-        databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_PROJECT_ID.appspot.com",
-        messagingSenderId: "YOUR_SENDER_ID",
-        appId: "YOUR_APP_ID"
+        apiKey: "AIzaSyCfZuHB13YusjkMBnbpq0rZ32_2c_thkto",
+        authDomain: "auto-classroom-energy-manager.firebaseapp.com",
+        databaseURL: "https://auto-classroom-energy-manager-default-rtdb.firebaseio.com",
+        projectId: "auto-classroom-energy-manager",
+        storageBucket: "auto-classroom-energy-manager.firebasestorage.app",
+        messagingSenderId: "658818233323",
+        appId: "1:658818233323:web:5c19d4aa5871575221dfae",
+        measurementId: "G-9H9ZZLLJZJ"
     };
 
     // Check if config is still placeholders
