@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data) {
                 // Console Logging as requested
                 console.log("Temperature:", data.temperature);
-                console.log("Occupancy:", data.occupied); // Note: I used 'occupied' to match the ESP32 code
+                console.log("Occupancy:", data.occupancy);
 
                 // Update UI for Temperature
                 if (data.temperature !== undefined) {
@@ -50,8 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 // Update UI for Occupancy
-                if (data.occupied !== undefined) {
-                    updateOccupancyUI(data.occupied);
+                if (data.occupancy !== undefined) {
+                    updateOccupancyUI(data.occupancy);
                 }
             }
         });
@@ -61,16 +61,21 @@ document.addEventListener('DOMContentLoaded', () => {
      * Helper to update UI based on occupancy status
      */
     function updateOccupancyUI(isOccupied) {
-        if (isOccupied) {
-            occupancyStatusEl.innerHTML = '<span class="text-brand-blue animate-pulse">Occupied</span>';
+        if (isOccupied === true) {
+            occupancyStatusEl.innerHTML = '<span class="text-brand-blue animate-pulse">Present</span>';
             statusIndicator.innerHTML = `
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                 <span class="relative inline-flex rounded-full h-3 w-3 bg-brand-blue"></span>
             `;
-        } else {
-            occupancyStatusEl.innerHTML = '<span class="text-slate-400">Not Occupied</span>';
+        } else if (isOccupied === false) {
+            occupancyStatusEl.innerHTML = '<span class="text-slate-400">Empty</span>';
             statusIndicator.innerHTML = `
                 <span class="relative inline-flex rounded-full h-3 w-3 bg-slate-300"></span>
+            `;
+        } else {
+            occupancyStatusEl.innerHTML = '<span class="text-slate-300">No Data</span>';
+            statusIndicator.innerHTML = `
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-slate-100"></span>
             `;
         }
     }
