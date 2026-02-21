@@ -35,20 +35,24 @@ document.addEventListener('DOMContentLoaded', () => {
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Listen for Temperature updates
-        database.ref('classroom/temperature').on('value', (snapshot) => {
-            const temp = snapshot.val();
-            if (temp !== null) {
-                tempValueEl.textContent = parseFloat(temp).toFixed(1);
-                updateTimestamp(tempUpdateTimeEl);
-            }
-        });
+        // Listen for all data under the 'classroom' node
+        database.ref('classroom').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                // Console Logging as requested
+                console.log("Temperature:", data.temperature);
+                console.log("Occupancy:", data.occupied); // Note: I used 'occupied' to match the ESP32 code
 
-        // Listen for Occupancy updates
-        database.ref('classroom/occupied').on('value', (snapshot) => {
-            const isOccupied = snapshot.val();
-            if (isOccupied !== null) {
-                updateOccupancyUI(isOccupied);
+                // Update UI for Temperature
+                if (data.temperature !== undefined) {
+                    tempValueEl.textContent = parseFloat(data.temperature).toFixed(1);
+                    updateTimestamp(tempUpdateTimeEl);
+                }
+
+                // Update UI for Occupancy
+                if (data.occupied !== undefined) {
+                    updateOccupancyUI(data.occupied);
+                }
             }
         });
     }
