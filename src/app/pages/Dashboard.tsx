@@ -37,6 +37,7 @@ export const Dashboard = () => {
   const [time, setTime] = useState(new Date());
   const [temperature, setTemperature] = useState<string | number>("--");
   const [occupancy, setOccupancy] = useState<string>("Loading...");
+  const [occupancyCount, setOccupancyCount] = useState<number>(0);
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
@@ -47,6 +48,7 @@ export const Dashboard = () => {
       const data = snapshot.val();
       if (data) {
         if (data.temperature !== undefined) setTemperature(data.temperature);
+        if (data.occupancy_count !== undefined) setOccupancyCount(data.occupancy_count);
 
         if (data.occupancy === true) {
           setOccupancy("Present");
@@ -124,9 +126,9 @@ export const Dashboard = () => {
           <MetricCard
             icon={Users}
             title="Current Occupancy"
-            value={occupancy}
-            unit=""
-            trend={occupancy === "Present" ? "Occupied" : "Empty"}
+            value={occupancyCount}
+            unit="People"
+            trend={occupancy}
             trendColor={occupancy === "Present" ? "blue" : "red"}
           />
         </div>

@@ -9,7 +9,6 @@
 #include <Firebase_ESP_Client.h>
 #include <WiFi.h>
 
-
 // Provide the token generation process info.
 #include "addons/TokenHelper.h"
 // Provide the RTDB payload printing info.
@@ -97,6 +96,14 @@ void loop() {
     if (Firebase.RTDB.setBool(&fbdo, "classroom/occupancy", isOccupied)) {
       Serial.print("Occupancy Sent: ");
       Serial.println(isOccupied ? "YES" : "NO");
+
+      // Send Occupancy Count (Simulated)
+      int peopleCount = isOccupied ? random(5, 30) : 0;
+      if (Firebase.RTDB.setInt(&fbdo, "classroom/occupancy_count",
+                               peopleCount)) {
+        Serial.print("Count Sent: ");
+        Serial.println(peopleCount);
+      }
     } else {
       Serial.println("FAILED: " + fbdo.errorReason());
     }
