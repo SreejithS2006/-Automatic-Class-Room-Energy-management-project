@@ -160,37 +160,41 @@ void loop() {
 
     dailyUsage += (powerLoad * timeDiffHours) / 1000.0; // Accumulate kWh
 
+    Serial.println("--- Syncing with Firebase ---");
+
+    FirebaseJson json;
+    // Only send temperature if it's a valid number
     if (!isnan(temp)) {
-      Serial.println("--- Sending Data ---");
-
-      // We use FirebaseJson to send all data in one go (efficient)
-      FirebaseJson json;
       json.set("temperature", temp);
-      json.set("occupancy", occupancy);
-      json.set("occupancy_count", peopleCount);
-      json.set("power_load", powerLoad);
-      json.set("daily_usage", dailyUsage);
+    } else {
+      Serial.println("Note: DHT Sensor not detected (Skipping Temp)");
+      json.set("temperature", "N/A");
+    }
 
-      // Heartbeat: Use Firebase server time
-      FirebaseJson lastSeen;
-      lastSeen.set(".sv", "timestamp");
-      json.set("last_seen", lastSeen);
+    json.set("occupancy", occupancy);
+    json.set("occupancy_count", peopleCount);
+    json.set("power_load", powerLoad);
+    json.set("daily_usage", dailyUsage);
 
-      if (Firebase.RTDB.updateNode(&fbdo, "/classroom", &json)) {
-        Serial.println("Update Successful!");
+    // Heartbeat: Use Firebase server time
+    FirebaseJson lastSeen;
+    lastSeen.set(".sv", "timestamp");
+    json.set("last_seen", lastSeen);
+
+    if (Firebase.RTDB.updateNode(&fbdo, "/classroom", &json)) {
+      Serial.println("Update Successful!");
+      if (!isnan(temp)) {
         Serial.print("Temp: ");
         Serial.println(temp);
-        Serial.print("People: ");
-        Serial.println(peopleCount);
-        Serial.print("Daily Usage: ");
-        Serial.print(dailyUsage, 6);
-        Serial.println(" kWh");
-      } else {
-        Serial.print("Update FAILED: ");
-        Serial.println(fbdo.errorReason());
       }
+      Serial.print("People: ");
+      Serial.println(peopleCount);
+      Serial.print("Daily Usage: ");
+      Serial.print(dailyUsage, 6);
+      Serial.println(" kWh");
     } else {
-      Serial.println("DHT Sensor Error!");
+      Serial.print("Update FAILED: ");
+      Serial.println(fbdo.errorReason());
     }
   }
 }
