@@ -38,6 +38,8 @@ export const Dashboard = () => {
   const [temperature, setTemperature] = useState<string | number>("--");
   const [occupancy, setOccupancy] = useState<string>("Loading...");
   const [occupancyCount, setOccupancyCount] = useState<number>(0);
+  const [powerLoad, setPowerLoad] = useState<number>(0);
+  const [dailyUsage, setDailyUsage] = useState<number>(0);
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
@@ -49,6 +51,8 @@ export const Dashboard = () => {
       if (data) {
         if (data.temperature !== undefined) setTemperature(data.temperature);
         if (data.occupancy_count !== undefined) setOccupancyCount(data.occupancy_count);
+        if (data.power_load !== undefined) setPowerLoad(data.power_load);
+        if (data.daily_usage !== undefined) setDailyUsage(data.daily_usage);
 
         if (data.occupancy === true) {
           setOccupancy("Present");
@@ -144,19 +148,19 @@ export const Dashboard = () => {
         <MetricCard
           icon={Zap}
           title="Power Load"
-          value="420"
+          value={powerLoad.toFixed(0)}
           unit="W"
-          trend="High"
-          trendColor="orange"
-          statusColor="text-orange-500"
+          trend={powerLoad > 50 ? "High" : "Low"}
+          trendColor={powerLoad > 50 ? "orange" : "green"}
+          statusColor={powerLoad > 50 ? "text-orange-500" : "text-green-500"}
         />
 
         <MetricCard
           icon={Cloud}
           title="Daily Usage"
-          value="12.4"
+          value={dailyUsage.toFixed(4)}
           unit="kWh"
-          trend="-5%"
+          trend="+0.001"
           trendColor="green"
         />
 

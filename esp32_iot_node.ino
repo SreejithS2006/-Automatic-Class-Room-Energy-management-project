@@ -1,11 +1,18 @@
 /**
- * Smart Classroom Energy Monitor - ESP32 Firmware
+ * Smart Classroom Energy Monitor - Integrated ESP32 Firmware
  * Developed for SmartEdge Solutions
+ *
+ * Integrated Hardware Logic:
+ * - DHT11 (Temperature)
+ * - Dual IR Sensor (Bidirectional People Counter)
  *
  * Dependencies:
  * - Firebase ESP Client (by Mobizt)
+ * - DHT sensor library (by Adafruit)
+ * - Adafruit Unified Sensor (by Adafruit)
  */
 
+#include <DHT.h>
 #include <Firebase_ESP_Client.h>
 #include <WiFi.h>
 
@@ -15,97 +22,162 @@
 #include "addons/RTDBHelper.h"
 
 // 1. WiFi Credentials
-#define WIFI_SSID "YOUR_WIFI_SSID"
-#define WIFI_PASSWORD "YOUR_WIFI_PASSWORD"
+#define WIFI_SSID "sreejith"
+#define WIFI_PASSWORD "Sreejith2"
 
-// 2. Firebase Credentials
-#define API_KEY "YOUR_FIREBASE_API_KEY"
-#define DATABASE_URL "YOUR_DATABASE_URL"
+// 2. Firebase Credentials (Pre-filled for your project)
+#define API_KEY "AIzaSyCfZuHB13YusjkMBnbpq0rZ32_2c_thkto"
+#define DATABASE_URL                                                           \
+  "https://auto-classroom-energy-manager-default-rtdb.firebaseio.com"
 
-// Define Firebase Data object
+// 3. Hardware Pins
+#define DHTPIN 4
+#define DHTTYPE DHT11
+#define IR1 18
+#define IR2 19
+
+// 4. Constants
+#define TIMEOUT 2000
+#define SEND_INTERVAL 5000
+
+// Objects
+DHT dht(DHTPIN, DHTTYPE);
 FirebaseData fbdo;
 FirebaseAuth auth;
 FirebaseConfig config;
 
+// State Variables
 unsigned long sendDataPrevMillis = 0;
+unsigned long triggerTime = 0;
 bool signupOK = false;
+int peopleCount = 0;
+float dailyUsage = 0.0; // Accumulated kWh
 
-// Simulated Sensor Data (Replace with real sensor reads)
-float temperature = 25.0;
-bool isOccupied = true;
+enum State { IDLE, ENTRY_WAIT, EXIT_WAIT };
+State currentState = IDLE;
 
 void setup() {
   Serial.begin(115200);
 
+  // Sensor Setup
+  pinMode(IR1, INPUT_PULLUP);
+  pinMode(IR2, INPUT_PULLUP);
+  dht.begin();
+
+  // WiFi Setup
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.print("Connecting to Wi-Fi");
   while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
     Serial.print(".");
-    delay(300);
   }
-  Serial.println();
-  Serial.print("Connected with IP: ");
+  Serial.println("\nWiFi Connected");
+  Serial.print("IP: ");
   Serial.println(WiFi.localIP());
-  Serial.println();
 
-  /* Assign the api key (required) */
+  // Firebase Setup
   config.api_key = API_KEY;
-
-  /* Assign the RTDB URL (required) */
   config.database_url = DATABASE_URL;
 
-  /* Sign up */
   if (Firebase.signUp(&config, &auth, "", "")) {
-    Serial.println("Firebase ok");
+    Serial.println("Firebase Signup OK");
     signupOK = true;
   } else {
-    Serial.printf("%s\n", config.signer.signupError.message.c_str());
+    Serial.printf("Signup Error: %s\n",
+                  config.signer.signupError.message.c_str());
   }
 
-  /* Assign the callback function for the long running token generation task */
-  config.token_status_callback = tokenStatusCallback; // see
-                                                      // addons/TokenHelper.h
-
+  config.token_status_callback = tokenStatusCallback;
   Firebase.begin(&config, &auth);
   Firebase.reconnectWiFi(true);
 }
 
 void loop() {
-  if (Firebase.ready() && signupOK &&
-      (millis() - sendDataPrevMillis > 5000 || sendDataPrevMillis == 0)) {
-    sendDataPrevMillis = millis();
+  // -------- PEOPLE COUNTING (BI-DIRECTIONAL) --------
+  bool s1 = digitalRead(IR1) == LOW;
+  bool s2 = digitalRead(IR2) == LOW;
 
-    // --- READ YOUR SENSORS HERE ---
-    // Example: temperature = dht.readTemperature();
-    // Example: isOccupied = digitalRead(PIR_PIN);
-
-    // Simulate some changes for testing
-    temperature += (random(-5, 6) / 10.0);
-    if (random(0, 100) > 90)
-      isOccupied = !isOccupied;
-
-    // Send Temperature to Firebase
-    if (Firebase.RTDB.setFloat(&fbdo, "classroom/temperature", temperature)) {
-      Serial.print("Temp Sent: ");
-      Serial.println(temperature);
-    } else {
-      Serial.println("FAILED: " + fbdo.errorReason());
+  switch (currentState) {
+  case IDLE:
+    if (s1 && !s2) {
+      currentState = ENTRY_WAIT;
+      triggerTime = millis();
+    } else if (s2 && !s1) {
+      currentState = EXIT_WAIT;
+      triggerTime = millis();
     }
+    break;
 
-    // Send Occupancy Status to Firebase
-    if (Firebase.RTDB.setBool(&fbdo, "classroom/occupancy", isOccupied)) {
-      Serial.print("Occupancy Sent: ");
-      Serial.println(isOccupied ? "YES" : "NO");
+  case ENTRY_WAIT:
+    if (s2) {
+      peopleCount++;
+      Serial.print("Entered | Total: ");
+      Serial.println(peopleCount);
+      currentState = IDLE;
+      delay(300);
+    } else if (millis() - triggerTime > TIMEOUT) {
+      currentState = IDLE;
+    }
+    break;
 
-      // Send Occupancy Count (Simulated)
-      int peopleCount = isOccupied ? random(5, 30) : 0;
-      if (Firebase.RTDB.setInt(&fbdo, "classroom/occupancy_count",
-                               peopleCount)) {
-        Serial.print("Count Sent: ");
+  case EXIT_WAIT:
+    if (s1) {
+      if (peopleCount > 0)
+        peopleCount--;
+      Serial.print("Exited | Total: ");
+      Serial.println(peopleCount);
+      currentState = IDLE;
+      delay(300);
+    } else if (millis() - triggerTime > TIMEOUT) {
+      currentState = IDLE;
+    }
+    break;
+  }
+
+  // -------- SEND DATA TO FIREBASE --------
+  if (Firebase.ready() && signupOK &&
+      (millis() - sendDataPrevMillis > SEND_INTERVAL ||
+       sendDataPrevMillis == 0)) {
+    unsigned long currentMillis = millis();
+    float timeDiffHours =
+        (currentMillis -
+         (sendDataPrevMillis == 0 ? currentMillis : sendDataPrevMillis)) /
+        3600000.0;
+    sendDataPrevMillis = currentMillis;
+
+    float temp = dht.readTemperature();
+    bool occupancy = (peopleCount > 0);
+
+    // Calculate Energy Usage
+    float powerLoad = occupancy ? 85.5 : 0.0; // Baseline Power (e.g., 85.5W)
+    dailyUsage += (powerLoad * timeDiffHours) / 1000.0; // Accumulate kWh
+
+    if (!isnan(temp)) {
+      Serial.println("--- Sending Data ---");
+
+      // We use FirebaseJson to send all data in one go (efficient)
+      FirebaseJson json;
+      json.set("temperature", temp);
+      json.set("occupancy", occupancy);
+      json.set("occupancy_count", peopleCount);
+      json.set("power_load", powerLoad);
+      json.set("daily_usage", dailyUsage);
+
+      if (Firebase.RTDB.updateNode(&fbdo, "/classroom", &json)) {
+        Serial.println("Update Successful!");
+        Serial.print("Temp: ");
+        Serial.println(temp);
+        Serial.print("People: ");
         Serial.println(peopleCount);
+        Serial.print("Daily Usage: ");
+        Serial.print(dailyUsage, 6);
+        Serial.println(" kWh");
+      } else {
+        Serial.print("Update FAILED: ");
+        Serial.println(fbdo.errorReason());
       }
     } else {
-      Serial.println("FAILED: " + fbdo.errorReason());
+      Serial.println("DHT Sensor Error!");
     }
   }
 }
