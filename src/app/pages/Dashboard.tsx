@@ -48,8 +48,12 @@ export const Dashboard = () => {
       setTime(new Date());
       // Check if ESP32 has been seen in the last 15 seconds
       if (lastSeen > 0) {
-        const secondsSinceLastSeen = (Date.now() - lastSeen) / 1000;
-        setIsOnline(secondsSinceLastSeen < 15);
+        const now = Date.now();
+        const secondsSinceLastSeen = (now - lastSeen) / 1000;
+        const online = secondsSinceLastSeen < 15;
+        setIsOnline(online);
+        // Debugging: uncomment to see heartbeat timing in console
+        // console.log(`Heartbeat check: ${secondsSinceLastSeen.toFixed(1)}s ago (Online: ${online})`);
       }
     }, 1000);
 
@@ -58,11 +62,15 @@ export const Dashboard = () => {
     const unsubscribe = onValue(dataRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
+        // console.log("Firebase Data Received:", data);
         if (data.temperature !== undefined) setTemperature(data.temperature);
         if (data.occupancy_count !== undefined) setOccupancyCount(data.occupancy_count);
         if (data.power_load !== undefined) setPowerLoad(data.power_load);
         if (data.daily_usage !== undefined) setDailyUsage(data.daily_usage);
-        if (data.last_seen !== undefined) setLastSeen(data.last_seen);
+        if (data.last_seen !== undefined) {
+          setLastSeen(data.last_seen);
+          // console.log("New Last Seen:", data.last_seen);
+        }
 
         if (data.occupancy === true) {
           setOccupancy("Present");
