@@ -124,12 +124,14 @@ export const Dashboard = () => {
           </div>
         </div>
         <div className="bg-[#1E293B] p-3 rounded-2xl flex items-center gap-3 border border-slate-700/50">
-          <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500">
+          <div className={`p-2 ${isOnline ? "bg-blue-500/10 text-blue-500" : "bg-red-500/10 text-red-500"} rounded-lg transition-colors duration-500`}>
             <Wifi size={18} />
           </div>
           <div>
             <p className="text-[10px] text-slate-400 font-medium uppercase">Network</p>
-            <p className="text-sm font-bold">Connected</p>
+            <p className={`text-sm font-bold ${isOnline ? "text-white" : "text-red-500"} transition-colors duration-500`}>
+              {isOnline ? "Connected" : "Offline"}
+            </p>
           </div>
         </div>
       </div>
