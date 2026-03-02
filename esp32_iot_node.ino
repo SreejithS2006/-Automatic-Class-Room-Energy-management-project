@@ -171,6 +171,11 @@ void loop() {
       json.set("power_load", powerLoad);
       json.set("daily_usage", dailyUsage);
 
+      // Heartbeat: Use Firebase server time
+      FirebaseJson lastSeen;
+      lastSeen.set(".sv", "timestamp");
+      json.set("last_seen", lastSeen);
+
       if (Firebase.RTDB.updateNode(&fbdo, "/classroom", &json)) {
         Serial.println("Update Successful!");
         Serial.print("Temp: ");

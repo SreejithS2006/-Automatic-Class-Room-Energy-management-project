@@ -40,9 +40,18 @@ export const Dashboard = () => {
   const [occupancyCount, setOccupancyCount] = useState<number>(0);
   const [powerLoad, setPowerLoad] = useState<number>(0);
   const [dailyUsage, setDailyUsage] = useState<number>(0);
+  const [lastSeen, setLastSeen] = useState<number>(0);
+  const [isOnline, setIsOnline] = useState<boolean>(false);
 
   useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 1000);
+    const timer = setInterval(() => {
+      setTime(new Date());
+      // Check if ESP32 has been seen in the last 15 seconds
+      if (lastSeen > 0) {
+        const secondsSinceLastSeen = (Date.now() - lastSeen) / 1000;
+        setIsOnline(secondsSinceLastSeen < 15);
+      }
+    }, 1000);
 
     // Firebase Realtime Database listener
     const dataRef = ref(db, "classroom");
@@ -53,6 +62,7 @@ export const Dashboard = () => {
         if (data.occupancy_count !== undefined) setOccupancyCount(data.occupancy_count);
         if (data.power_load !== undefined) setPowerLoad(data.power_load);
         if (data.daily_usage !== undefined) setDailyUsage(data.daily_usage);
+        if (data.last_seen !== undefined) setLastSeen(data.last_seen);
 
         if (data.occupancy === true) {
           setOccupancy("Present");
@@ -68,7 +78,7 @@ export const Dashboard = () => {
       clearInterval(timer);
       unsubscribe();
     };
-  }, []);
+  }, [lastSeen]);
 
   return (
     <div className="space-y-6 max-w-md mx-auto">
@@ -80,9 +90,9 @@ export const Dashboard = () => {
         </div>
         <div className="text-right">
           <p className="text-xl font-mono font-medium">{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-          <p className="text-[#22C55E] text-xs font-medium flex items-center justify-end gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse" />
-            Live Sync
+          <p className={`${isOnline ? "text-[#22C55E]" : "text-red-500"} text-xs font-medium flex items-center justify-end gap-1 transition-colors duration-500`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? "bg-[#22C55E] animate-pulse" : "bg-red-500"}`} />
+            {isOnline ? "Connected" : "Offline"}
           </p>
         </div>
       </div>
