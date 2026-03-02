@@ -175,6 +175,7 @@ void loop() {
     json.set("occupancy_count", peopleCount);
     json.set("power_load", powerLoad);
     json.set("daily_usage", dailyUsage);
+    json.set("network", true); // Add network status for compatibility
 
     // Heartbeat: Use Firebase server time
     FirebaseJson lastSeen;

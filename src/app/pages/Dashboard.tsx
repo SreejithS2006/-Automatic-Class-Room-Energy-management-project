@@ -67,9 +67,16 @@ export const Dashboard = () => {
         if (data.occupancy_count !== undefined) setOccupancyCount(data.occupancy_count);
         if (data.power_load !== undefined) setPowerLoad(data.power_load);
         if (data.daily_usage !== undefined) setDailyUsage(data.daily_usage);
+
+        // Use 'last_seen' heartbeat if available
         if (data.last_seen !== undefined) {
           setLastSeen(data.last_seen);
-          // console.log("New Last Seen:", data.last_seen);
+        }
+        // Fallback: If 'network' boolean exists and heartbeat is missing/stale
+        else if (data.network === true) {
+          setIsOnline(true);
+        } else if (data.network === false) {
+          setIsOnline(false);
         }
 
         if (data.occupancy === true) {
