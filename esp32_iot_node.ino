@@ -148,8 +148,16 @@ void loop() {
     float temp = dht.readTemperature();
     bool occupancy = (peopleCount > 0);
 
-    // Calculate Energy Usage
-    float powerLoad = occupancy ? 85.5 : 0.0; // Baseline Power (e.g., 85.5W)
+    // Calculate Dynamic Power Load
+    float powerLoad = 0.0;
+    if (occupancy) {
+      // Base load (Lights + 1 Fan) = 40W
+      // Plus 2W for every person detected
+      powerLoad = 40.0 + (peopleCount * 2.0);
+      // Add a small random jitter (+/- 2W) to make it look "live"
+      powerLoad += (random(-20, 21) / 10.0);
+    }
+
     dailyUsage += (powerLoad * timeDiffHours) / 1000.0; // Accumulate kWh
 
     if (!isnan(temp)) {
