@@ -36,6 +36,7 @@ const db = getDatabase(app);
 export const Dashboard = () => {
   const [time, setTime] = useState(new Date());
   const [temperature, setTemperature] = useState<string | number>("--");
+  const [humidity, setHumidity] = useState<string | number>("--");
   const [occupancy, setOccupancy] = useState<string>("Loading...");
   const [occupancyCount, setOccupancyCount] = useState<number>(0);
   const [powerLoad, setPowerLoad] = useState<number>(0);
@@ -64,6 +65,7 @@ export const Dashboard = () => {
       if (data) {
         // console.log("Firebase Data Received:", data);
         if (data.temperature !== undefined) setTemperature(data.temperature);
+        if (data.humidity !== undefined) setHumidity(data.humidity);
         if (data.occupancy_count !== undefined) setOccupancyCount(data.occupancy_count);
         if (data.power_load !== undefined) setPowerLoad(data.power_load);
         if (data.daily_usage !== undefined) setDailyUsage(data.daily_usage);
@@ -208,7 +210,7 @@ export const Dashboard = () => {
         <MetricCard
           icon={Droplets}
           title="Humidity"
-          value="45"
+          value={humidity}
           unit="%"
           statusColor="text-blue-400"
         />

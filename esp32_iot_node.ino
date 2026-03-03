@@ -146,19 +146,17 @@ void loop() {
     sendDataPrevMillis = currentMillis;
 
     float temp = dht.readTemperature();
+    float hum = dht.readHumidity();
     bool occupancy = (peopleCount > 0);
 
     // Calculate Dynamic Power Load
     float powerLoad = 0.0;
     if (occupancy) {
-      // Base load (Lights + 1 Fan) = 40W
-      // Plus 2W for every person detected
       powerLoad = 40.0 + (peopleCount * 2.0);
-      // Add a small random jitter (+/- 2W) to make it look "live"
       powerLoad += (random(-20, 21) / 10.0);
     }
 
-    dailyUsage += (powerLoad * timeDiffHours) / 1000.0; // Accumulate kWh
+    dailyUsage += (powerLoad * timeDiffHours) / 1000.0;
 
     Serial.println("--- Syncing with Firebase ---");
 
@@ -167,15 +165,23 @@ void loop() {
     if (!isnan(temp)) {
       json.set("temperature", temp);
     } else {
-      Serial.println("Note: DHT Sensor not detected (Skipping Temp)");
+      Serial.println("Note: DHT Temperature sensor not detected");
       json.set("temperature", "N/A");
+    }
+
+    // Only send humidity if it's a valid number
+    if (!isnan(hum)) {
+      json.set("humidity", hum);
+    } else {
+      Serial.println("Note: DHT Humidity sensor not detected");
+      json.set("humidity", "N/A");
     }
 
     json.set("occupancy", occupancy);
     json.set("occupancy_count", peopleCount);
     json.set("power_load", powerLoad);
     json.set("daily_usage", dailyUsage);
-    json.set("network", true); // Add network status for compatibility
+    json.set("network", true);
 
     // Heartbeat: Use Firebase server time
     FirebaseJson lastSeen;
@@ -186,7 +192,13 @@ void loop() {
       Serial.println("Update Successful!");
       if (!isnan(temp)) {
         Serial.print("Temp: ");
-        Serial.println(temp);
+        Serial.print(temp);
+        Serial.println("°C");
+      }
+      if (!isnan(hum)) {
+        Serial.print("Humidity: ");
+        Serial.print(hum);
+        Serial.println("%");
       }
       Serial.print("People: ");
       Serial.println(peopleCount);
