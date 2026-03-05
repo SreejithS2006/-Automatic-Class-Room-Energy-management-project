@@ -165,8 +165,6 @@ export const Dashboard = () => {
             title="Current Occupancy"
             value={occupancyCount}
             unit="People"
-            trend={occupancy}
-            trendColor={occupancy === "Present" ? "blue" : "red"}
           />
         </div>
 
