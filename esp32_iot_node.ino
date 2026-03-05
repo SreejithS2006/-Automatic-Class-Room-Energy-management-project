@@ -33,6 +33,7 @@
 // 3. Hardware Pins
 #define DHTPIN 4
 #define DHTTYPE DHT11
+#define LDR_PIN 34 // Analog pin for LDR sensor
 #define IR1 18
 #define IR2 19
 
@@ -158,6 +159,25 @@ void loop() {
 
     dailyUsage += (powerLoad * timeDiffHours) / 1000.0;
 
+    // --- Smart Device Logic ---
+    int fanSpeed = 0;
+    int brightness = 0;
+    int rawLDR = analogRead(LDR_PIN);
+    // Map raw ADC (0-4095) to percentage (0-100)
+    // Inverting map if LDR resistance decreases with light
+    int ldr_value = map(rawLDR, 0, 4095, 0, 100);
+
+    if (occupancy) {
+      if (temp > 22.0) {
+        fanSpeed = 20 + (int)((temp - 22.0) * 10);
+        if (fanSpeed > 100)
+          fanSpeed = 100;
+      } else {
+        fanSpeed = 20;
+      }
+      brightness = (peopleCount > 4) ? 100 : 80;
+    }
+
     Serial.println("--- Syncing with Firebase ---");
 
     FirebaseJson json;
@@ -181,6 +201,9 @@ void loop() {
     json.set("occupancy_count", peopleCount);
     json.set("power_load", powerLoad);
     json.set("daily_usage", dailyUsage);
+    json.set("fan_speed", fanSpeed);
+    json.set("brightness", brightness);
+    json.set("ldr_value", ldr_value); // New LDR reading
     json.set("network", true);
 
     // Heartbeat: Use Firebase server time
@@ -202,6 +225,12 @@ void loop() {
       }
       Serial.print("People: ");
       Serial.println(peopleCount);
+      Serial.print("Fan: ");
+      Serial.print(fanSpeed);
+      Serial.println("%");
+      Serial.print("Brightness: ");
+      Serial.print(brightness);
+      Serial.println("%");
       Serial.print("Daily Usage: ");
       Serial.print(dailyUsage, 6);
       Serial.println(" kWh");

@@ -38,7 +38,7 @@ export const Dashboard = () => {
   const [temperature, setTemperature] = useState<string | number>("--");
   const [humidity, setHumidity] = useState<string | number>("--");
   const [fanSpeed, setFanSpeed] = useState<number>(0);
-  const [brightness, setBrightness] = useState<number>(0);
+  const [ldrValue, setLdrValue] = useState<number>(0);
   const [occupancy, setOccupancy] = useState<string>("Loading...");
   const [occupancyCount, setOccupancyCount] = useState<number>(0);
   const [powerLoad, setPowerLoad] = useState<number>(0);
@@ -69,7 +69,7 @@ export const Dashboard = () => {
         if (data.temperature !== undefined) setTemperature(data.temperature);
         if (data.humidity !== undefined) setHumidity(data.humidity);
         if (data.fan_speed !== undefined) setFanSpeed(data.fan_speed);
-        if (data.brightness !== undefined) setBrightness(data.brightness);
+        if (data.ldr_value !== undefined) setLdrValue(data.ldr_value);
         if (data.occupancy_count !== undefined) setOccupancyCount(data.occupancy_count);
         if (data.power_load !== undefined) setPowerLoad(data.power_load);
         if (data.daily_usage !== undefined) setDailyUsage(data.daily_usage);
@@ -207,7 +207,7 @@ export const Dashboard = () => {
         <MetricCard
           icon={Lightbulb}
           title="Brightness"
-          value={brightness}
+          value={ldrValue}
           unit="%"
         />
 
