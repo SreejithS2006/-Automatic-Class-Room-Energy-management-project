@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { 
-  Power, 
-  Settings2, 
-  Wind, 
-  Lightbulb, 
-  Clock, 
+import {
+  Power,
+  Settings2,
+  Wind,
+  Lightbulb,
+  Clock,
   AlertTriangle,
   Zap,
   Cpu
@@ -16,6 +16,17 @@ export const Control = () => {
   const [manualOverride, setManualOverride] = useState(false);
   const [fanSpeed, setFanSpeed] = useState(65);
   const [brightness, setBrightness] = useState(80);
+  const toggleAutoMode = () => {
+    const nextAuto = !autoMode;
+    setAutoMode(nextAuto);
+    setManualOverride(!nextAuto);
+  };
+
+  const toggleManualOverride = () => {
+    const nextManual = !manualOverride;
+    setManualOverride(nextManual);
+    setAutoMode(!nextManual);
+  };
 
   return (
     <div className="space-y-6 max-w-md mx-auto">
@@ -36,11 +47,11 @@ export const Control = () => {
               <p className="text-xs text-slate-400">AI occupancy management</p>
             </div>
           </div>
-          <button 
-            onClick={() => setAutoMode(!autoMode)}
+          <button
+            onClick={toggleAutoMode}
             className={`w-12 h-6 rounded-full transition-colors relative ${autoMode ? 'bg-[#22C55E]' : 'bg-slate-700'}`}
           >
-            <motion.div 
+            <motion.div
               animate={{ x: autoMode ? 24 : 2 }}
               className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm"
             />
@@ -57,11 +68,11 @@ export const Control = () => {
               <p className="text-xs text-slate-400">Disable occupancy sensor</p>
             </div>
           </div>
-          <button 
-            onClick={() => setManualOverride(!manualOverride)}
+          <button
+            onClick={toggleManualOverride}
             className={`w-12 h-6 rounded-full transition-colors relative ${manualOverride ? 'bg-orange-500' : 'bg-slate-700'}`}
           >
-            <motion.div 
+            <motion.div
               animate={{ x: manualOverride ? 24 : 2 }}
               className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm"
             />
@@ -81,10 +92,10 @@ export const Control = () => {
             </div>
             <span className="text-lg font-bold font-mono text-blue-400">{fanSpeed}%</span>
           </div>
-          <input 
-            type="range" 
-            min="0" 
-            max="100" 
+          <input
+            type="range"
+            min="0"
+            max="100"
             value={fanSpeed}
             onChange={(e) => setFanSpeed(parseInt(e.target.value))}
             className="w-full h-2 bg-[#0F172A] rounded-lg appearance-none cursor-pointer accent-[#22C55E]"
@@ -106,10 +117,10 @@ export const Control = () => {
             </div>
             <span className="text-lg font-bold font-mono text-yellow-500">{brightness}%</span>
           </div>
-          <input 
-            type="range" 
-            min="0" 
-            max="100" 
+          <input
+            type="range"
+            min="0"
+            max="100"
             value={brightness}
             onChange={(e) => setBrightness(parseInt(e.target.value))}
             className="w-full h-2 bg-[#0F172A] rounded-lg appearance-none cursor-pointer accent-[#22C55E]"
