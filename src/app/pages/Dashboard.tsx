@@ -33,6 +33,21 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+const SCHEDULE_DATA = [
+  { start: "09:00", end: "10:00", subject: "24ECJ404 – Microprocessors and Microcontrollers", type: "class" },
+  { start: "10:00", end: "10:05", subject: "Break", type: "break" },
+  { start: "10:05", end: "11:05", subject: "24ECP407(B) – Machine Intelligence", type: "class" },
+  { start: "11:05", end: "11:10", subject: "Break", type: "break" },
+  { start: "11:10", end: "12:10", subject: "24ECP407(B) – Machine Intelligence", type: "class" },
+  { start: "12:10", end: "12:15", subject: "Break", type: "break" },
+  { start: "12:15", end: "13:00", subject: "Lunch Break", type: "break" },
+  { start: "13:00", end: "14:00", subject: "24ECT402 – Signals and Systems", type: "class" },
+  { start: "14:00", end: "14:05", subject: "Break", type: "break" },
+  { start: "14:05", end: "15:05", subject: "24ECP403 – Analog Circuits", type: "class" },
+  { start: "15:05", end: "15:10", subject: "Break", type: "break" },
+  { start: "15:10", end: "16:00", subject: "Free / Lab / Extra Session", type: "class" },
+];
+
 export const Dashboard = () => {
   const [time, setTime] = useState(new Date());
   const [temperature, setTemperature] = useState<string | number>("--");
@@ -45,6 +60,23 @@ export const Dashboard = () => {
   const [dailyUsage, setDailyUsage] = useState<number>(0);
   const [lastSeen, setLastSeen] = useState<number>(0);
   const [isOnline, setIsOnline] = useState<boolean>(false);
+
+  // Determine current and next session
+  const currentMinutes = time.getHours() * 60 + time.getMinutes();
+
+  const currentSession = SCHEDULE_DATA.find(s => {
+    const [sH, sM] = s.start.split(':').map(Number);
+    const [eH, eM] = s.end.split(':').map(Number);
+    const startM = sH * 60 + sM;
+    const endM = eH * 60 + eM;
+    return currentMinutes >= startM && currentMinutes < endM;
+  });
+
+  const nextSession = SCHEDULE_DATA.find(s => {
+    const [sH, sM] = s.start.split(':').map(Number);
+    const startM = sH * 60 + sM;
+    return startM > currentMinutes;
+  });
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -132,6 +164,40 @@ export const Dashboard = () => {
           </span>
         </div>
       </div>
+
+      {/* Class Schedule Card */}
+      <motion.div
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="bg-[#1E293B] p-5 rounded-3xl border border-slate-700/50 relative overflow-hidden group"
+      >
+        <div className="absolute top-0 right-0 p-8 bg-blue-500/10 blur-3xl rounded-full -mr-4 -mt-4" />
+
+        <div className="relative flex justify-between items-start mb-4">
+          <div>
+            <p className="text-[10px] text-blue-400 font-bold uppercase tracking-[0.2em] mb-1">Active Session</p>
+            <h2 className="text-lg font-bold leading-tight">
+              {currentSession ? currentSession.subject : "No Active Class"}
+            </h2>
+            <p className="text-xs text-slate-400 mt-1">
+              {currentSession ? `${currentSession.start} - ${currentSession.end}` : "Next class later"}
+            </p>
+          </div>
+          <div className={`p-2 rounded-xl ${currentSession?.type === 'class' ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-800 text-slate-500'}`}>
+            <Activity size={20} />
+          </div>
+        </div>
+
+        {nextSession && (
+          <div className="relative border-t border-slate-700/50 pt-4 mt-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-slate-600" />
+              <p className="text-[10px] text-slate-400 font-medium">NEXT: <span className="text-slate-200">{nextSession.subject}</span></p>
+            </div>
+            <p className="text-[10px] text-slate-500 font-mono tracking-tighter">{nextSession.start}</p>
+          </div>
+        )}
+      </motion.div>
 
       {/* System Status Banner */}
       <div className="grid grid-cols-2 gap-3">
