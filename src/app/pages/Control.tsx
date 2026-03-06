@@ -108,27 +108,26 @@ export const Control = () => {
         </div>
 
         <div className="bg-[#1E293B] p-6 rounded-3xl border border-slate-700/50">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-yellow-500/10 rounded-xl text-yellow-500">
+              <div className={`p-2 rounded-xl ${brightness > 0 ? 'bg-yellow-500/10 text-yellow-500' : 'bg-slate-800 text-slate-500'}`}>
                 <Lightbulb size={20} />
               </div>
-              <h3 className="text-sm font-bold">Brightness</h3>
+              <div>
+                <h3 className="text-sm font-bold">Light</h3>
+                <p className="text-[10px] text-slate-500 uppercase tracking-widest">{brightness > 0 ? 'On' : 'Off'}</p>
+              </div>
             </div>
-            <span className="text-lg font-bold font-mono text-yellow-500">{brightness}%</span>
-          </div>
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={brightness}
-            onChange={(e) => setBrightness(parseInt(e.target.value))}
-            className="w-full h-2 bg-[#0F172A] rounded-lg appearance-none cursor-pointer accent-[#22C55E]"
-            disabled={autoMode && !manualOverride}
-          />
-          <div className="flex justify-between mt-2 text-[10px] font-medium text-slate-500 uppercase tracking-widest">
-            <span>Dim</span>
-            <span>Bright</span>
+            <button
+              onClick={() => setBrightness(brightness === 0 ? 100 : 0)}
+              className={`w-12 h-6 rounded-full transition-colors relative ${brightness > 0 ? 'bg-yellow-500' : 'bg-slate-700'}`}
+              disabled={autoMode && !manualOverride}
+            >
+              <motion.div
+                animate={{ x: brightness > 0 ? 24 : 2 }}
+                className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm"
+              />
+            </button>
           </div>
         </div>
       </div>
