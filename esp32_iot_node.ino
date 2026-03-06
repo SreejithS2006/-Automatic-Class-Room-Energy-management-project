@@ -159,23 +159,53 @@ void loop() {
 
     dailyUsage += (powerLoad * timeDiffHours) / 1000.0;
 
-    // --- Smart Device Logic ---
+    // --- Fetch Control Settings from Firebase ---
     int fanSpeed = 0;
     int brightness = 0;
+    bool autoMode = true;
+    int manualLight = 0;
+    int manualFan = 0;
+
+    if (Firebase.RTDB.getJSON(&fbdo, "/classroom/control")) {
+      FirebaseJson &json = fbdo.jsonObject();
+      FirebaseJsonData jsonData;
+
+      json.get(jsonData, "auto_mode");
+      if (jsonData.success)
+        autoMode = jsonData.boolValue;
+
+      json.get(jsonData, "manual_light");
+      if (jsonData.success)
+        manualLight = jsonData.intValue;
+
+      json.get(jsonData, "manual_fan");
+      if (jsonData.success)
+        manualFan = jsonData.intValue;
+
+      Serial.print("Mode: ");
+      Serial.println(autoMode ? "AUTO" : "MANUAL");
+    }
+
     int rawLDR = analogRead(LDR_PIN);
-    // Map raw ADC (0-4095) to percentage (0-100)
-    // Inverting map if LDR resistance decreases with light
     int ldr_value = map(rawLDR, 0, 4095, 0, 100);
 
-    if (occupancy) {
-      if (temp > 22.0) {
-        fanSpeed = 20 + (int)((temp - 22.0) * 10);
-        if (fanSpeed > 100)
-          fanSpeed = 100;
-      } else {
-        fanSpeed = 20;
+    if (autoMode) {
+      // SMART LOGIC (Sensor Based)
+      if (occupancy) {
+        if (temp > 22.0) {
+          fanSpeed = 20 + (int)((temp - 22.0) * 10);
+          if (fanSpeed > 100)
+            fanSpeed = 100;
+        } else {
+          fanSpeed = 20;
+        }
+        brightness = (peopleCount > 4) ? 100 : 80;
       }
-      brightness = (peopleCount > 4) ? 100 : 80;
+    } else {
+      // MANUAL OVERRIDE (User Controlled)
+      fanSpeed = manualFan;
+      brightness = manualLight;
+      Serial.println("!!! Manual Override Active !!!");
     }
 
     Serial.println("--- Syncing with Firebase ---");

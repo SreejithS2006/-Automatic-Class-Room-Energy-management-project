@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Power,
   Settings2,
@@ -10,22 +10,66 @@ import {
   Cpu
 } from "lucide-react";
 import { motion } from "motion/react";
+import { initializeApp } from "firebase/app";
+import { getDatabase, ref, onValue, set } from "firebase/database";
+
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyCfZuHB13YusjkMBnbpq0rZ32_2c_thkto",
+  authDomain: "auto-classroom-energy-manager.firebaseapp.com",
+  databaseURL: "https://auto-classroom-energy-manager-default-rtdb.firebaseio.com",
+  projectId: "auto-classroom-energy-manager",
+  storageBucket: "auto-classroom-energy-manager.firebasestorage.app",
+  messagingSenderId: "658818233323",
+  appId: "1:658818233323:web:5c19d4aa5871575221dfae",
+  measurementId: "G-9H9ZZLLJZJ"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
 export const Control = () => {
   const [autoMode, setAutoMode] = useState(true);
   const [manualOverride, setManualOverride] = useState(false);
   const [fanSpeed, setFanSpeed] = useState(65);
   const [brightness, setBrightness] = useState(80);
+
+  useEffect(() => {
+    const controlRef = ref(db, "classroom/control");
+    const unsubscribe = onValue(controlRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        if (data.auto_mode !== undefined) {
+          setAutoMode(data.auto_mode);
+          setManualOverride(!data.auto_mode);
+        }
+        if (data.manual_fan !== undefined) setFanSpeed(data.manual_fan);
+        if (data.manual_light !== undefined) setBrightness(data.manual_light);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   const toggleAutoMode = () => {
     const nextAuto = !autoMode;
-    setAutoMode(nextAuto);
-    setManualOverride(!nextAuto);
+    set(ref(db, "classroom/control/auto_mode"), nextAuto);
   };
 
   const toggleManualOverride = () => {
     const nextManual = !manualOverride;
-    setManualOverride(nextManual);
-    setAutoMode(!nextManual);
+    set(ref(db, "classroom/control/auto_mode"), !nextManual);
+  };
+
+  const updateFanSpeed = (value: number) => {
+    setFanSpeed(value);
+    set(ref(db, "classroom/control/manual_fan"), value);
+  };
+
+  const toggleLight = () => {
+    const nextVal = brightness === 0 ? 100 : 0;
+    set(ref(db, "classroom/control/manual_light"), nextVal);
   };
 
   return (
@@ -97,7 +141,7 @@ export const Control = () => {
             min="0"
             max="100"
             value={fanSpeed}
-            onChange={(e) => setFanSpeed(parseInt(e.target.value))}
+            onChange={(e) => updateFanSpeed(parseInt(e.target.value))}
             className="w-full h-2 bg-[#0F172A] rounded-lg appearance-none cursor-pointer accent-[#22C55E]"
             disabled={autoMode && !manualOverride}
           />
@@ -119,7 +163,7 @@ export const Control = () => {
               </div>
             </div>
             <button
-              onClick={() => setBrightness(brightness === 0 ? 100 : 0)}
+              onClick={toggleLight}
               className={`w-12 h-6 rounded-full transition-colors relative ${brightness > 0 ? 'bg-yellow-500' : 'bg-slate-700'}`}
               disabled={autoMode && !manualOverride}
             >
