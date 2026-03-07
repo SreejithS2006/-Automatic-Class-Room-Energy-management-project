@@ -1,7 +1,9 @@
 import React from "react";
 import { Outlet, NavLink, useLocation } from "react-router";
-import { LayoutDashboard, ChartBar, Settings, SlidersHorizontal } from "lucide-react";
+import { LayoutDashboard, ChartBar, Settings, SlidersHorizontal, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { auth } from "../routes";
+import { signOut } from "firebase/auth";
 
 export const Layout = () => {
   const location = useLocation();
@@ -12,6 +14,17 @@ export const Layout = () => {
     { path: "/control", icon: SlidersHorizontal, label: "Control" },
     { path: "/settings", icon: Settings, label: "Settings" },
   ];
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (e) {
+      console.error("Firebase signout error:", e);
+    }
+    localStorage.removeItem("classroom_id");
+    localStorage.removeItem("auth_timestamp");
+    window.location.href = "/login";
+  };
 
   return (
     <div className="flex flex-col h-screen bg-[#0F172A] text-white font-sans overflow-hidden">
@@ -37,27 +50,25 @@ export const Layout = () => {
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
-            
+
             return (
               <NavLink
                 key={item.path}
                 to={item.path}
                 className="flex flex-col items-center justify-center space-y-1 group"
               >
-                <div className={`p-2 rounded-xl transition-all duration-300 ${
-                  isActive 
-                    ? "bg-[#22C55E]/10 text-[#22C55E]" 
+                <div className={`p-2 rounded-xl transition-all duration-300 ${isActive
+                    ? "bg-[#22C55E]/10 text-[#22C55E]"
                     : "text-slate-400 group-hover:text-slate-300"
-                }`}>
+                  }`}>
                   <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
                 </div>
-                <span className={`text-[10px] font-medium transition-colors ${
-                  isActive ? "text-[#22C55E]" : "text-slate-400"
-                }`}>
+                <span className={`text-[10px] font-medium transition-colors ${isActive ? "text-[#22C55E]" : "text-slate-400"
+                  }`}>
                   {item.label}
                 </span>
                 {isActive && (
-                  <motion.div 
+                  <motion.div
                     layoutId="nav-pill"
                     className="absolute -top-1 w-1 h-1 bg-[#22C55E] rounded-full"
                   />
@@ -65,6 +76,19 @@ export const Layout = () => {
               </NavLink>
             );
           })}
+
+          {/* Logout Button */}
+          <button
+            onClick={handleLogout}
+            className="flex flex-col items-center justify-center space-y-1 group"
+          >
+            <div className="p-2 rounded-xl text-red-400/70 group-hover:text-red-400 transition-all duration-300">
+              <LogOut size={24} />
+            </div>
+            <span className="text-[10px] font-medium text-slate-400 group-hover:text-red-400 transition-colors">
+              Exit
+            </span>
+          </button>
         </div>
       </nav>
     </div>

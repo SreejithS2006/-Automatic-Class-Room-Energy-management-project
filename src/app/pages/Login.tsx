@@ -20,6 +20,15 @@ export const Login = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
+    // Auto-redirect if already logged in
+    React.useEffect(() => {
+        const hasLocalSession = !!localStorage.getItem("classroom_id") &&
+            !!localStorage.getItem("auth_timestamp");
+        if (hasLocalSession) {
+            navigate("/", { replace: true });
+        }
+    }, [navigate]);
+
     const handlePinChange = (index: number, value: string) => {
         if (!/^\d*$/.test(value)) return;
 
@@ -139,7 +148,7 @@ export const Login = () => {
                                 Secure 4-Digit PIN
                             </label>
                             <div className="flex justify-center gap-[14px]">
-                                {pin.map((digit, i) => (
+                                {pin.map((digit: string, i: number) => (
                                     <input
                                         key={i}
                                         id={`pin-${i}`}
