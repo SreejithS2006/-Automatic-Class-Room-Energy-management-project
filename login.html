@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Classroom | Login Terminal</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-color: #060B18;
+            --card-bg: rgba(15, 23, 42, 0.6);
+            --primary-blue: #3b82f6;
+            --secondary-emerald: #10b981;
+            --text-white: #ffffff;
+            --text-slate: #94a3b8;
+            --border-color: rgba(51, 65, 85, 0.4);
+            --input-bg: rgba(6, 11, 24, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-white);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Abstract Background Glows */
+        .glow {
+            position: absolute;
+            width: 45%;
+            height: 45%;
+            border-radius: 50%;
+            filter: blur(140px);
+            opacity: 0.12;
+            z-index: -1;
+        }
+
+        .glow-1 {
+            top: -10%;
+            left: -10%;
+            background-color: var(--primary-blue);
+        }
+
+        .glow-2 {
+            bottom: -10%;
+            right: -10%;
+            background-color: var(--secondary-emerald);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 420px;
+            padding: 24px;
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Logo Section */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo-icon {
+            display: inline-flex;
+            padding: 18px;
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.15);
+            border-radius: 24px;
+            margin-bottom: 24px;
+            color: var(--primary-blue);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 8px;
+            background: linear-gradient(to bottom, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-slate);
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+        }
+
+        /* Card Section */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border-color);
+            border-radius: 36px;
+            padding: 40px;
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-bg-icon {
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            opacity: 0.03;
+            color: white;
+            pointer-events: none;
+        }
+
+        .form-group {
+            margin-bottom: 32px;
+        }
+
+        label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #64748b;
+            margin-bottom: 14px;
+            margin-left: 4px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #475569;
+            transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        /* Styled Select Dropdown */
+        select {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid #1e293b;
+            border-radius: 18px;
+            padding: 18px 48px 18px 52px;
+            color: white;
+            font-size: 15px;
+            font-weight: 500;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        select:focus {
+            border-color: rgba(59, 130, 246, 0.6);
+            background: rgba(15, 23, 42, 0.9);
+            box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.3);
+        }
+
+        select:focus+.input-icon {
+            color: var(--primary-blue);
+        }
+
+        .select-arrow {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #475569;
+            pointer-events: none;
+        }
+
+        /* PIN Input Styles */
+        .pin-container {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+        }
+
+        .pin-slot {
+            width: 60px;
+            height: 72px;
+            background: var(--input-bg);
+            border: 1px solid #1e293b;
+            border-radius: 18px;
+            text-align: center;
+            font-size: 28px;
+            font-weight: 600;
+            color: white;
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .pin-slot:focus {
+            border-color: var(--primary-blue);
+            background: rgba(15, 23, 42, 0.9);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+            z-index: 10;
+        }
+
+        /* Button Section */
+        button {
+            width: 100%;
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 18px;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 12px 24px -6px rgba(37, 99, 235, 0.4);
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 32px -8px rgba(37, 99, 235, 0.5);
+            filter: brightness(1.1);
+        }
+
+        button:active:not(:disabled) {
+            transform: scale(0.97);
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .loader {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 0.8s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Error Message */
+        .error-msg {
+            display: none;
+            background: rgba(244, 63, 94, 0.08);
+            border: 1px solid rgba(244, 63, 94, 0.15);
+            color: #fb7185;
+            padding: 16px 20px;
+            border-radius: 18px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 28px;
+            align-items: center;
+            gap: 10px;
+            animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+        }
+
+        @keyframes shake {
+
+            10%,
+            90% {
+                transform: translate3d(-1px, 0, 0);
+            }
+
+            20%,
+            80% {
+                transform: translate3d(2px, 0, 0);
+            }
+
+            30%,
+            50%,
+            70% {
+                transform: translate3d(-4px, 0, 0);
+            }
+
+            40%,
+            60% {
+                transform: translate3d(4px, 0, 0);
+            }
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.25em;
+            color: #475569;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .company-name {
+            color: var(--primary-blue);
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        /* Select styling for dark theme options */
+        option {
+            background-color: #0F172A;
+            color: white;
+            padding: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+
+    <div class="container">
+        <!-- Logo Header -->
+        <div class="header">
+            <div class="logo-icon">
+                <i data-lucide="cpu" size="44"></i>
+            </div>
+            <h1>Smart Classroom</h1>
+            <p class="subtitle">Energy Management System v2.0</p>
+        </div>
+
+        <!-- Login Card -->
+        <div class="card">
+            <div class="card-bg-icon">
+                <i data-lucide="shield-check" size="160"></i>
+            </div>
+
+            <div id="error-box" class="error-msg">
+                <i data-lucide="alert-circle" size="18"></i>
+                <span id="error-text">Invalid credentials.</span>
+            </div>
+
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="room">Select Classroom</label>
+                    <div class="input-wrapper">
+                        <i data-lucide="door-open" class="input-icon" size="22"></i>
+                        <select id="room" required>
+                            <option value="" disabled selected>Select Room...</option>
+                            <option value="402">Engineering Lab • Room 402</option>
+                            <option value="101">Lecture Hall • Room 101</option>
+                            <option value="205">Conference Room • Room 205</option>
+                            <option value="312">Physics Lab • Room 312</option>
+                        </select>
+                        <i data-lucide="chevron-down" class="select-arrow" size="18"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Secure 4-Digit PIN</label>
+                    <div class="pin-container" id="pin-inputs">
+                        <input type="password" class="pin-slot" maxlength="1" inputmode="numeric" pattern="[0-9]*"
+                            autocomplete="one-time-code">
+                        <input type="password" class="pin-slot" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                        <input type="password" class="pin-slot" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                        <input type="password" class="pin-slot" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                    </div>
+                </div>
+
+                <button type="submit" id="submit-btn" disabled>
+                    <span id="btn-content">ACCESS TERMINAL</span>
+                    <i id="btn-icon" data-lucide="arrow-right" size="20"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- Page Footer -->
+        <div class="footer">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i data-lucide="hash" size="14"></i>
+                Encrypted Session • Protocol V2
+            </div>
+            <div class="company-name">SmartEdge Solution</div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        const form = document.getElementById('login-form');
+        const roomSelect = document.getElementById('room');
+        const pinSlots = document.querySelectorAll('.pin-slot');
+        const submitBtn = document.getElementById('submit-btn');
+        const errorBox = document.getElementById('error-box');
+        const errorText = document.getElementById('error-text');
+        const btnContent = document.getElementById('btn-content');
+        const btnIcon = document.getElementById('btn-icon');
+
+        // PIN Input Logic
+        pinSlots.forEach((slot, index) => {
+            // Only allow numbers
+            slot.addEventListener('input', (e) => {
+                const val = e.target.value;
+                if (!/^\d$/.test(val)) {
+                    e.target.value = '';
+                    return;
+                }
+
+                // Move to next slot
+                if (val && index < pinSlots.length - 1) {
+                    pinSlots[index + 1].focus();
+                }
+
+                checkReady();
+            });
+
+            // Handle backspace
+            slot.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !slot.value && index > 0) {
+                    pinSlots[index - 1].focus();
+                }
+            });
+
+            // Auto focus first slot on reload logic
+            if (index === 0) slot.focus();
+        });
+
+        roomSelect.addEventListener('change', checkReady);
+
+        function checkReady() {
+            const pinComplete = Array.from(pinSlots).every(s => s.value !== '');
+            const roomSelected = roomSelect.value !== '';
+            submitBtn.disabled = !(pinComplete && roomSelected);
+        }
+
+        // Handle Form Submission
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const pin = Array.from(pinSlots).map(s => s.value).join('');
+            const room = roomSelect.options[roomSelect.selectedIndex].text;
+
+            // Start Loading State
+            submitBtn.disabled = true;
+            btnContent.style.visibility = 'hidden';
+            btnIcon.style.visibility = 'hidden';
+
+            const loader = document.createElement('div');
+            loader.className = 'loader';
+            loader.style.position = 'absolute';
+            submitBtn.appendChild(loader);
+
+            errorBox.style.display = 'none';
+
+            // Simulate Auth
+            setTimeout(() => {
+                submitBtn.removeChild(loader);
+
+                if (pin === '1234') {
+                    // Success Simulation
+                    btnContent.style.visibility = 'visible';
+                    btnContent.textContent = 'ACCESS GRANTED';
+                    submitBtn.style.background = 'linear-gradient(135deg, #059669, #10b981)';
+
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 800);
+                } else {
+                    // Fail Case
+                    btnContent.style.visibility = 'visible';
+                    btnIcon.style.visibility = 'visible';
+                    submitBtn.disabled = false;
+
+                    errorText.textContent = 'Authentication failed. Incorrect PIN for ' + room;
+                    errorBox.style.display = 'flex';
+
+                    // Clear PIN
+                    pinSlots.forEach(s => s.value = '');
+                    pinSlots[0].focus();
+                    checkReady();
+                }
+            }, 1800);
+        });
+    </script>
+</body>
+
+</html>

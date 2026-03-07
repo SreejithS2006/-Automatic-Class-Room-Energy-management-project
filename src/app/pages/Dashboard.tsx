@@ -48,7 +48,15 @@ const SCHEDULE_DATA = [
   { start: "15:10", end: "16:00", subject: "Free / Lab / Extra Session", type: "class" },
 ];
 
+const ROOM_MAP: Record<string, { name: string; subtitle: string; level: string }> = {
+  "402": { name: "Engineering Lab", subtitle: "Room 402", level: "Level 4 • Zone B" },
+  "101": { name: "Lecture Hall", subtitle: "Room 101", level: "Level 1 • Zone A" },
+  "205": { name: "Conference Room", subtitle: "Room 205", level: "Level 2 • Zone C" },
+  "312": { name: "Physics Lab", subtitle: "Room 312", level: "Level 3 • Zone D" },
+};
+
 export const Dashboard = () => {
+  const [roomData, setRoomData] = useState(ROOM_MAP["402"]);
   const [time, setTime] = useState(new Date());
   const [temperature, setTemperature] = useState<string | number>("--");
   const [humidity, setHumidity] = useState<string | number>("--");
@@ -94,7 +102,7 @@ export const Dashboard = () => {
 
     // Firebase Realtime Database listener
     const dataRef = ref(db, "classroom");
-    const unsubscribe = onValue(dataRef, (snapshot) => {
+    const unsubscribe = onValue(dataRef, (snapshot: any) => {
       const data = snapshot.val();
       if (data) {
         // console.log("Firebase Data Received:", data);
@@ -127,6 +135,12 @@ export const Dashboard = () => {
       }
     });
 
+    // Load room data from localStorage
+    const savedRoomId = localStorage.getItem("classroom_id");
+    if (savedRoomId && ROOM_MAP[savedRoomId]) {
+      setRoomData(ROOM_MAP[savedRoomId]);
+    }
+
     return () => {
       clearInterval(timer);
       unsubscribe();
@@ -138,8 +152,8 @@ export const Dashboard = () => {
       {/* Header */}
       <div className="flex justify-between items-center px-1">
         <div>
-          <h1 className="text-2xl font-bold">Smart Classroom</h1>
-          <p className="text-slate-400 text-sm">Engineering Lab • Room 402</p>
+          <h1 className="text-2xl font-bold">{roomData.name}</h1>
+          <p className="text-slate-400 text-sm">{roomData.subtitle}</p>
         </div>
         <div className="text-right">
           <p className="text-xl font-mono font-medium">{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
@@ -160,7 +174,7 @@ export const Dashboard = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-transparent to-transparent" />
         <div className="absolute bottom-4 left-4">
           <span className="px-3 py-1 rounded-full bg-black/40 backdrop-blur-md text-[10px] font-bold border border-white/10 uppercase tracking-widest">
-            Level 4 • Zone B
+            {roomData.level}
           </span>
         </div>
       </div>

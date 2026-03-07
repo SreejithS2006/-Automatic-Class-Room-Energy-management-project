@@ -26,26 +26,31 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 const ProtectedRoute = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-    });
-    return () => unsubscribe();
+    // Check for classroom session in localStorage
+    const roomId = localStorage.getItem("classroom_id");
+    const authTime = localStorage.getItem("auth_timestamp");
+
+    if (roomId && authTime) {
+      // Simple check: session valid if less than 24 hours old
+      const isValid = (Date.now() - parseInt(authTime)) < 24 * 60 * 60 * 1000;
+      setIsAuthorized(isValid);
+    } else {
+      setIsAuthorized(false);
+    }
   }, []);
 
-  if (loading) {
+  if (isAuthorized === null) {
     return (
-      <div className= "min-h-screen bg-[#0F172A] flex items-center justify-center" >
-      <div className="w-10 h-10 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
-        </div>
+      <div className="min-h-screen bg-[#060B18] flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+      </div>
     );
   }
 
-return user ? <Outlet /> : <Navigate to="/login" replace />;
+  return isAuthorized ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 export const router = createBrowserRouter([
