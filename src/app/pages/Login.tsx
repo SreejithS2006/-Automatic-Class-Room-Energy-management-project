@@ -10,7 +10,8 @@ import {
     Hash
 } from "lucide-react";
 import { useNavigate } from "react-router";
-import { getAuth, signInAnonymously } from "firebase/auth";
+import { signInAnonymously } from "firebase/auth";
+import { auth } from "../routes";
 
 export const Login = () => {
     const [room, setRoom] = useState("");
@@ -18,7 +19,6 @@ export const Login = () => {
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const auth = getAuth();
 
     const handlePinChange = (index: number, value: string) => {
         if (!/^\d*$/.test(value)) return;
@@ -30,14 +30,14 @@ export const Login = () => {
         // Auto-focus next
         if (value && index < 3) {
             const nextInput = document.getElementById(`pin-${index + 1}`);
-            nextInput?.focus();
+            if (nextInput) (nextInput as HTMLInputElement).focus();
         }
     };
 
     const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Backspace" && !pin[index] && index > 0) {
             const prevInput = document.getElementById(`pin-${index - 1}`);
-            prevInput?.focus();
+            if (prevInput) (prevInput as HTMLInputElement).focus();
         }
     };
 
@@ -50,27 +50,29 @@ export const Login = () => {
 
         const fullPin = pin.join("");
 
-        try {
-            if (fullPin === "1234") {
-                // Try Firebase Auth, but don't block login if it's disabled/restricted
-                try {
-                    await signInAnonymously(auth);
-                } catch (e) {
-                    console.warn("Firebase Anonymous Auth failed, proceeding with local session only:", e);
-                }
+        if (fullPin === "1234") {
+            // 1. Set local session immediately (Primary Auth)
+            localStorage.setItem("classroom_id", room);
+            localStorage.setItem("auth_timestamp", Date.now().toString());
 
-                localStorage.setItem("classroom_id", room);
-                localStorage.setItem("auth_timestamp", Date.now().toString());
-                navigate("/");
-            } else {
-                setError(`Authentication failed. Incorrect PIN for Room ${room}`);
-                setLoading(false);
-                setPin(["", "", "", ""]);
-                document.getElementById("pin-0")?.focus();
+            // 2. Attempt Firebase Auth silently (Secondary/Data Auth)
+            try {
+                // We don't await this so it doesn't block the UI/Navigation
+                signInAnonymously(auth).catch((err) => {
+                    console.warn("Silent Firebase Auth failed:", err.message);
+                });
+            } catch (err) {
+                // Total isolation from the navigation flow
             }
-        } catch (err: any) {
-            setError(err.message || "An error occurred during authentication.");
+
+            // 3. Navigate immediately
+            navigate("/");
+        } else {
+            setError(`Authentication failed. Incorrect PIN for Room ${room}`);
             setLoading(false);
+            setPin(["", "", "", ""]);
+            const firstInput = document.getElementById("pin-0");
+            if (firstInput) (firstInput as HTMLInputElement).focus();
         }
     };
 
@@ -137,7 +139,7 @@ export const Login = () => {
                                 Secure 4-Digit PIN
                             </label>
                             <div className="flex justify-center gap-[14px]">
-                                {pin.map((digit: string, i: number) => (
+                                {pin.map((digit, i) => (
                                     <input
                                         key={i}
                                         id={`pin-${i}`}
