@@ -52,9 +52,13 @@ export const Login = () => {
 
         try {
             if (fullPin === "1234") {
-                // For simulation/exhibition purposes, we use Anonymous Auth
-                // and store the selected room in localStorage
-                await signInAnonymously(auth);
+                // Try Firebase Auth, but don't block login if it's disabled/restricted
+                try {
+                    await signInAnonymously(auth);
+                } catch (e) {
+                    console.warn("Firebase Anonymous Auth failed, proceeding with local session only:", e);
+                }
+
                 localStorage.setItem("classroom_id", room);
                 localStorage.setItem("auth_timestamp", Date.now().toString());
                 navigate("/");
