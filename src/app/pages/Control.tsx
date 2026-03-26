@@ -10,24 +10,7 @@ import {
   Cpu
 } from "lucide-react";
 import { motion } from "motion/react";
-import { initializeApp } from "firebase/app";
-import { getDatabase, ref, onValue, set } from "firebase/database";
-
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyCfZuHB13YusjkMBnbpq0rZ32_2c_thkto",
-  authDomain: "auto-classroom-energy-manager.firebaseapp.com",
-  databaseURL: "https://auto-classroom-energy-manager-default-rtdb.firebaseio.com",
-  projectId: "auto-classroom-energy-manager",
-  storageBucket: "auto-classroom-energy-manager.firebasestorage.app",
-  messagingSenderId: "658818233323",
-  appId: "1:658818233323:web:5c19d4aa5871575221dfae",
-  measurementId: "G-9H9ZZLLJZJ"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+import { db } from "../firebase";
 
 export const Control = () => {
   const [autoMode, setAutoMode] = useState(true);

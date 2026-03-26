@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { createBrowserRouter, Navigate, Outlet } from "react-router";
-import { initializeApp } from "firebase/app";
+
 import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 import { Layout } from "./components/Layout";
 import { Dashboard } from "./pages/Dashboard";
@@ -9,21 +9,7 @@ import { Control } from "./pages/Control";
 import { Settings } from "./pages/Settings";
 import { Login } from "./pages/Login";
 
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyCfZuHB13YusjkMBnbpq0rZ32_2c_thkto",
-  authDomain: "auto-classroom-energy-manager.firebaseapp.com",
-  databaseURL: "https://auto-classroom-energy-manager-default-rtdb.firebaseio.com",
-  projectId: "auto-classroom-energy-manager",
-  storageBucket: "auto-classroom-energy-manager.firebasestorage.app",
-  messagingSenderId: "658818233323",
-  appId: "1:658818233323:web:5c19d4aa5871575221dfae",
-  measurementId: "G-9H9ZZLLJZJ"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+import { auth } from "./firebase";
 
 const ProtectedRoute = () => {
   const [user, setUser] = useState<User | null>(null);

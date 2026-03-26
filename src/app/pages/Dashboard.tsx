@@ -12,26 +12,7 @@ import {
 } from "lucide-react";
 import { MetricCard } from "../components/MetricCard";
 import { motion } from "motion/react";
-import { initializeApp } from "firebase/app";
-import { getDatabase, ref, onValue } from "firebase/database";
-
-import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-
-// Firebase configuration from user
-const firebaseConfig = {
-  apiKey: "AIzaSyCfZuHB13YusjkMBnbpq0rZ32_2c_thkto",
-  authDomain: "auto-classroom-energy-manager.firebaseapp.com",
-  databaseURL: "https://auto-classroom-energy-manager-default-rtdb.firebaseio.com",
-  projectId: "auto-classroom-energy-manager",
-  storageBucket: "auto-classroom-energy-manager.firebasestorage.app",
-  messagingSenderId: "658818233323",
-  appId: "1:658818233323:web:5c19d4aa5871575221dfae",
-  measurementId: "G-9H9ZZLLJZJ"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+import { db } from "../firebase";
 
 const SCHEDULE_DATA = [
   { start: "09:00", end: "10:00", subject: "24ECJ404 – Microprocessors and Microcontrollers", type: "class" },
