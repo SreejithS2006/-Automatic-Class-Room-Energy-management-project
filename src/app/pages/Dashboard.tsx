@@ -13,6 +13,8 @@ import {
 import { MetricCard } from "../components/MetricCard";
 import { motion } from "motion/react";
 import { db } from "../firebase";
+import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { ref, onValue } from "firebase/database";
 
 const SCHEDULE_DATA = [
   { start: "09:00", end: "10:00", subject: "24ECJ404 – Microprocessors and Microcontrollers", type: "class" },
@@ -90,10 +92,17 @@ export const Dashboard = () => {
         if (data.temperature !== undefined) setTemperature(data.temperature);
         if (data.humidity !== undefined) setHumidity(data.humidity);
         if (data.fan_speed !== undefined) setFanSpeed(data.fan_speed);
+
+        // Handle variations in light/brightness keys
         if (data.ldr_value !== undefined) setLdrValue(data.ldr_value);
+        else if (data.brightness !== undefined) setLdrValue(data.brightness);
+
         if (data.occupancy_count !== undefined) setOccupancyCount(data.occupancy_count);
         if (data.power_load !== undefined) setPowerLoad(data.power_load);
-        if (data.daily_usage !== undefined) setDailyUsage(data.daily_usage);
+
+        // Handle variations in daily energy keys
+        if (data.daily_energy_kWh !== undefined) setDailyUsage(data.daily_energy_kWh);
+        else if (data.daily_usage !== undefined) setDailyUsage(data.daily_usage);
 
         // Use 'last_seen' heartbeat if available
         if (data.last_seen !== undefined) {

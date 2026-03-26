@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { signInAnonymously } from "firebase/auth";
-import { auth } from "../routes";
+import { auth } from "../firebase";
 
 export const Login = () => {
     const [room, setRoom] = useState("");
